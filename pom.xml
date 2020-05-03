@@ -9,13 +9,15 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.jz</groupId>
-    <artifactId>spring</artifactId>
+    <artifactId>java</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring</name>
-    <description>Demo project for Spring Boot</description>
+    <name>java</name>
+    <description>Java 语言学习 - Base On Spring Boot</description>
+    <packaging>pom</packaging>
 
     <properties>
         <java.version>13</java.version>
+        <skipTests>true</skipTests>
     </properties>
 
     <dependencies>
@@ -54,13 +56,10 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <modules>
+        <module>java-lang</module>
+        <module>java-collection</module>
+        <module>java-concurrent</module>
+    </modules>
 
 </project>
