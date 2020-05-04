@@ -10,6 +10,44 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class ReentrantLockTests {
     @Test
+    public void test2() throws InterruptedException {
+        ReentrantLock lock = new ReentrantLock();
+        Thread t1 = new Thread(() -> {
+            log.debug("启动...");
+            // 不可中断模式
+            lock.lock();
+            log.info("中断状态：{}",Thread.currentThread().isInterrupted());
+/*            try {
+//                 可中断模式
+                lock.lockInterruptibly();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                log.debug("等锁的过程中被打断");
+                log.info("中断状态：{}",Thread.currentThread().isInterrupted());
+                return;
+            }*/
+            try {
+                log.debug("获得了锁");
+            } finally {
+                log.debug("释放了锁");
+                lock.unlock();
+            }
+        }, "t1");
+        lock.lock();
+        log.debug("获得了锁");
+        t1.start();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+            t1.interrupt();
+            log.debug("执行打断");
+            TimeUnit.SECONDS.sleep(1);
+        } finally {
+            log.debug("释放了锁");
+            lock.unlock();
+        }
+    }
+
+    @Test
     public void test1() throws InterruptedException {
         Counter counter = new Counter();
         for (int i = 0; i < 10000; i++) {
