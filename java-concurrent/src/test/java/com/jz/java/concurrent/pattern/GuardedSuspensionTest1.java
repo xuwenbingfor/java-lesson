@@ -45,8 +45,6 @@ public class GuardedSuspensionTest1 {
         new PrintMan("a", 1, 2, printMachine).start();
         new PrintMan("b", 2, 3, printMachine).start();
         new PrintMan("c", 3, 1, printMachine).start();
-        TimeUnit.SECONDS.sleep(1);
-        printMachine.start();
         TimeUnit.SECONDS.sleep(3);
     }
 
@@ -93,35 +91,19 @@ public class GuardedSuspensionTest1 {
         public void print(String printContent, int flag, int nextFlag) {
             lock.lock();
             try {
-                await(flag);
+                while (waitFlag != flag) {
+                    conditionList.get(flag - 1).await();
+                }
                 log.info("线程{}打印{}", Thread.currentThread().getId(), printContent);
                 this.waitFlag = nextFlag;
-                signal(this.waitFlag);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        public void start() {
-            lock.lock();
-            try {
-                signal(this.waitFlag);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        private void await(int flag) {
-            try {
-                conditionList.get(flag - 1).await();
+                conditionList.get(this.waitFlag - 1).signal();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            } finally {
+                lock.unlock();
             }
         }
 
-        private void signal(int flag) {
-            conditionList.get(flag - 1).signal();
-        }
     }
 
     @Slf4j
