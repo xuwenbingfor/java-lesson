@@ -43,7 +43,11 @@ public class ThreadPoolTests {
         List<Future<Integer>> futures = executorService.invokeAll(Arrays.asList(callable2, callable4, callable6),
                 5, TimeUnit.SECONDS);
         for (Future<Integer> future : futures) {
-            log.info("{}", future.get());
+            try {
+                log.info("{}", future.get());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         long time2 = System.currentTimeMillis();
         log.info("time2：{}", time2);
