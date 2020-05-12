@@ -15,28 +15,60 @@ import java.util.concurrent.*;
 @Slf4j
 public class ThreadPoolTests {
     @Test
+    public void test3() throws InterruptedException, ExecutionException {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        // 每隔1秒执行一次任务
+//        scheduledExecutorService.scheduleAtFixedRate(() -> {
+//            log.info("线程{} running", Thread.currentThread().getId());
+//        }, 0, 1, TimeUnit.SECONDS);
+//        TimeUnit.SECONDS.sleep(10);
+
+        // 每隔任务之间隔1秒
+        scheduledExecutorService.scheduleWithFixedDelay(() -> {
+            log.info("线程{} running", Thread.currentThread().getId());
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            log.info("线程{} over", Thread.currentThread().getId());
+        }, 0, 1, TimeUnit.SECONDS);
+        TimeUnit.SECONDS.sleep(10);
+    }
+
+    @Test
+    public void test2() throws InterruptedException, ExecutionException {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        // 延迟多少秒后执行
+        scheduledExecutorService.schedule(() -> {
+            log.info("线程{} running", Thread.currentThread().getId());
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            int i = 1 / 0;
+        }, 1, TimeUnit.SECONDS);
+        scheduledExecutorService.schedule(() -> {
+            log.info("线程{} running", Thread.currentThread().getId());
+        }, 1, TimeUnit.SECONDS);
+        TimeUnit.SECONDS.sleep(3);
+    }
+
+    @Test
     public void test1() throws InterruptedException, ExecutionException {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
-        Callable<Integer> callable2 = new Callable<>() {
-            @Override
-            public Integer call() throws Exception {
-                TimeUnit.SECONDS.sleep(2);
-                return 2;
-            }
+        Callable<Integer> callable2 = () -> {
+            TimeUnit.SECONDS.sleep(2);
+            return 2;
         };
-        Callable<Integer> callable4 = new Callable<>() {
-            @Override
-            public Integer call() throws Exception {
-                TimeUnit.SECONDS.sleep(4);
-                return 4;
-            }
+        Callable<Integer> callable4 = () -> {
+            TimeUnit.SECONDS.sleep(4);
+            return 4;
         };
-        Callable<Integer> callable6 = new Callable<>() {
-            @Override
-            public Integer call() throws Exception {
-                TimeUnit.SECONDS.sleep(6);
-                return 6;
-            }
+        Callable<Integer> callable6 = () -> {
+            TimeUnit.SECONDS.sleep(6);
+            return 6;
         };
         long time1 = System.currentTimeMillis();
         log.info("time1：{}", time1);
