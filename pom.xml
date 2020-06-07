@@ -61,6 +61,7 @@
         <module>java-collection</module>
         <module>java-concurrent</module>
         <module>java-io</module>
+        <module>java-jvm</module>
     </modules>
 
 </project>
