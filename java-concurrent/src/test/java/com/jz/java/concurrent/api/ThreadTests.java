@@ -13,14 +13,20 @@ public class ThreadTests {
         Thread t1 = new Thread(() -> {
             for (int i = 0; i < 5; i++) {
                 log.debug("park...");
-                LockSupport.park();
+                // 打断LockSupport.park和sleep状态线程区别比较
+//                LockSupport.park();
+                try {
+                    Thread.sleep(10*1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 log.debug("打断状态：{}", Thread.currentThread().isInterrupted());
             }
         });
         t1.start();
         TimeUnit.SECONDS.sleep(1);
         t1.interrupt();
-//        TimeUnit.SECONDS.sleep(5);
+        TimeUnit.SECONDS.sleep(5);
     }
 
     @Test

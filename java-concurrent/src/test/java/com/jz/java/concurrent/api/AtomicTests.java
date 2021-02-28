@@ -17,7 +17,8 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class AtomicTests {
-    private volatile int field;
+    //    private volatile int field;
+    private int field;
 
     @Test
     public void test6() {
