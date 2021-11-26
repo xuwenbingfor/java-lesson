@@ -15,11 +15,11 @@ public class ThreadTests {
                 log.debug("park...");
                 // 打断LockSupport.park和sleep状态线程区别比较
 //                LockSupport.park();
-                try {
-                    Thread.sleep(10*1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    Thread.sleep(10*1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
                 log.debug("打断状态：{}", Thread.currentThread().isInterrupted());
             }
         });

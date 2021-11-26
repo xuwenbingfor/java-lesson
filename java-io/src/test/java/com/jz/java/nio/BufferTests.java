@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * @author xuwenbingfor
@@ -12,6 +13,35 @@ import java.nio.ByteBuffer;
  */
 @Slf4j
 public class BufferTests {
+    @Test
+    public void test3() {
+        int n = 5;
+        ByteBuffer buffer = ByteBuffer.allocate(n);
+        buffer.put((byte) 5);
+        buffer.put((byte) 8);
+        buffer.put((byte) 3);
+        System.out.println("The Original ByteBuffer is: " + Arrays.toString(buffer.array()));
+        System.out.println("The position is: " + buffer.position());
+        System.out.println("The limit is: " + buffer.limit());
+        ByteBuffer bufferCompact = buffer.compact();
+        System.out.println("\nThe Compacted ByteBuffer is: " + Arrays.toString(bufferCompact.array()));
+        System.out.println("The position is: " + bufferCompact.position());
+        System.out.println("The limit is: " + bufferCompact.limit());
+    }
+
+    @Test
+    public void test2() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(10);
+        log.info("position:{}", byteBuffer.position());
+        log.info("limit:{}", byteBuffer.limit());
+        log.info("capacity:{}", byteBuffer.capacity());
+        byte[] bytes = new byte[10];
+        byteBuffer.put(bytes);
+        log.info("position:{}", byteBuffer.position());
+        log.info("limit:{}", byteBuffer.limit());
+        log.info("capacity:{}", byteBuffer.capacity());
+    }
+
     @Test
     public void test1() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
@@ -52,7 +82,7 @@ public class BufferTests {
         log.info("capacity:{}", byteBuffer.capacity());
 
         log.info("--------- get for test -----------");
-        log.info("read : {}", (char)byteBuffer.get());
+        log.info("read : {}", (char) byteBuffer.get());
         log.info("position:{}", byteBuffer.position());
         log.info("limit:{}", byteBuffer.limit());
         log.info("capacity:{}", byteBuffer.capacity());
