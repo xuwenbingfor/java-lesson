@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.Arrays;
 
 /**
@@ -14,6 +15,38 @@ import java.util.Arrays;
 @Slf4j
 public class BufferTests {
     @Test
+    public void test5() {
+        CharBuffer buffer = CharBuffer.allocate(8);
+        buffer.put('1');
+        buffer.put('2');
+        buffer.put('3');
+        buffer.flip();
+        System.out.println(buffer);
+    }
+
+    @Test
+    public void test4() {
+        int n = 5;
+        ByteBuffer buffer = ByteBuffer.allocate(n);
+        buffer.put((byte) 5);
+        buffer.put((byte) 8);
+        buffer.put((byte) 3);
+        System.out.println("The Original ByteBuffer is: " + Arrays.toString(buffer.array()));
+        System.out.println("The position is: " + buffer.position());
+        System.out.println("The limit is: " + buffer.limit());
+        // 读模式也可以写
+        buffer.flip();
+        byte b = buffer.get();
+        System.out.println("The b is: " + b);
+        System.out.println("The position is: " + buffer.position());
+        System.out.println("The limit is: " + buffer.limit());
+        buffer.put((byte) 9);
+        System.out.println("The Original ByteBuffer is: " + Arrays.toString(buffer.array()));
+        System.out.println("The position is: " + buffer.position());
+        System.out.println("The limit is: " + buffer.limit());
+    }
+
+    @Test
     public void test3() {
         int n = 5;
         ByteBuffer buffer = ByteBuffer.allocate(n);
@@ -23,6 +56,8 @@ public class BufferTests {
         System.out.println("The Original ByteBuffer is: " + Arrays.toString(buffer.array()));
         System.out.println("The position is: " + buffer.position());
         System.out.println("The limit is: " + buffer.limit());
+//        buffer.flip();
+//        buffer.get();
         ByteBuffer bufferCompact = buffer.compact();
         System.out.println("\nThe Compacted ByteBuffer is: " + Arrays.toString(bufferCompact.array()));
         System.out.println("The position is: " + bufferCompact.position());
