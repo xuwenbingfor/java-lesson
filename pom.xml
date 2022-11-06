@@ -63,6 +63,7 @@
         <module>java-io</module>
         <module>java-jvm</module>
         <module>rocketmq</module>
+        <module>mysql</module>
     </modules>
 
 </project>
