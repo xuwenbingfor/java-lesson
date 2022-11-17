@@ -18,14 +18,20 @@
     <properties>
         <java.version>13</java.version>
         <skipTests>true</skipTests>
+        <hutool.version>5.8.9</hutool.version>
     </properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+        <!--        hutool-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.62</version>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-json</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-http</artifactId>
+            <version>${hutool.version}</version>
         </dependency>
 
         <dependency>
