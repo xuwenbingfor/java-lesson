@@ -1,6 +1,6 @@
 package com.jz.java.collection.util;
 
-import com.jz.java.collection.JsonUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
@@ -14,7 +14,7 @@ public class PrintUtils {
      */
     public static void print(Object object) {
         String name = object.getClass().getName();
-        log.info("{}: {}", name, JsonUtil.toJson(object));
+        log.info("{}: {}", name, JSONUtil.toJsonStr(object));
     }
 
     /**
@@ -25,6 +25,6 @@ public class PrintUtils {
     public static void print(Collection collection) {
         String name = collection.getClass().getName();
         log.info("{} size: {}", name, collection.size());
-        log.info("{}: {}", name, JsonUtil.toJson(collection));
+        log.info("{}: {}", name, JSONUtil.toJsonStr(collection));
     }
 }

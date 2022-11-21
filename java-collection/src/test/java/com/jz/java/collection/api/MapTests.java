@@ -1,6 +1,6 @@
 package com.jz.java.collection.api;
 
-import com.jz.java.collection.JsonUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +15,6 @@ public class MapTests {
         // HashMap允许key==null
         map.put(null, "hello1");
         map.put(null, "hello2");
-        log.info("{}", JsonUtil.toJson(map));
+        log.info("{}",  JSONUtil.toJsonStr(map));
     }
 }
