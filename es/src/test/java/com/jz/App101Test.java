@@ -5,13 +5,15 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.InlineScript;
 import co.elastic.clients.elasticsearch._types.Script;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
-import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.*;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.core.bulk.DeleteOperation;
 import co.elastic.clients.elasticsearch.core.bulk.IndexOperation;
+import co.elastic.clients.elasticsearch.core.search.CompletionSuggester;
+import co.elastic.clients.elasticsearch.core.search.FieldSuggester;
+import co.elastic.clients.elasticsearch.core.search.Suggester;
 import co.elastic.clients.elasticsearch.indices.GetMappingRequest;
 import co.elastic.clients.elasticsearch.indices.GetMappingResponse;
 import co.elastic.clients.elasticsearch.indices.PutMappingRequest;
@@ -30,6 +32,34 @@ import java.util.List;
  */
 @Slf4j
 public class App101Test {
+    /**
+     * 搜索建议
+     *
+     * @throws IOException
+     */
+    @Test
+    public void test11() throws IOException {
+        ElasticsearchClient esClient = ElasticsearchUtil.createClient();
+        //
+        CompletionSuggester completionSuggester = CompletionSuggester.of(
+                builder -> builder.field("query_word")
+        );
+        FieldSuggester fieldSuggester = FieldSuggester.of(builder -> builder
+//                .prefix("如家")
+                        .prefix("格林")
+                        .completion(completionSuggester)
+        );
+        Suggester suggester = Suggester.of(builder -> builder
+                .suggesters("product_sug", fieldSuggester)
+        );
+        SearchRequest searchRequest = SearchRequest.of(builder -> builder
+                .index("products")
+                .suggest(suggester)
+        );
+        SearchResponse<Product> searchResponse = esClient.search(searchRequest, Product.class);
+        log.info(searchResponse.toString());
+    }
+
     /**
      * 按条件删除
      *
@@ -155,7 +185,8 @@ public class App101Test {
         log.info("Indexed with version " + response.version());*/
 
 //        Product product = new Product("car-1", "bmw", 9.9);
-        Product product = new Product("car-2", "bmw", 9.9);
+        Product product = new Product("bk-3", "bmw", 9.9);
+        product.setQuery_word("格林豪泰上海");
         UpdateRequest<Product, Product> updateRequest = UpdateRequest.of(builder -> builder
                 .index("products")
                 .id(product.getSku())
@@ -229,11 +260,20 @@ public class App101Test {
     public void test4() throws IOException {
         ElasticsearchClient esClient = ElasticsearchUtil.createClient();
         // Property为了统一TextProperty等不同类型，为了实现 “PutMappingRequest#properties(Map<String, Property> map)”
-        TextProperty textProperty = TextProperty.of(builder -> builder);
+/*        TextProperty textProperty = TextProperty.of(builder -> builder);
         Property property = Property.of(builder -> builder.text(textProperty));
         PutMappingRequest putMappingRequest = PutMappingRequest.of(builder -> builder
                 .index("products")
                 .properties("tag", property)
+        );*/
+        Property property = Property.of(
+                builder -> builder.completion(
+                        b -> b
+                )
+        );
+        PutMappingRequest putMappingRequest = PutMappingRequest.of(builder -> builder
+                .index("products")
+                .properties("query_word", property)
         );
         //
         PutMappingResponse putMappingResponse = esClient.indices().putMapping(putMappingRequest);

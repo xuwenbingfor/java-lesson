@@ -27,6 +27,8 @@ public class Product {
     private String name;
     private double price;
 
+    private String query_word;
+
     public Product() {
     }
 
@@ -34,6 +36,14 @@ public class Product {
         this.sku = sku;
         this.name = name;
         this.price = price;
+    }
+
+    public String getQuery_word() {
+        return query_word;
+    }
+
+    public void setQuery_word(String query_word) {
+        this.query_word = query_word;
     }
 
     public String getSku() {

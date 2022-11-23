@@ -1,7 +1,9 @@
 package com.jz;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.*;
 import co.elastic.clients.elasticsearch._types.mapping.*;
+import co.elastic.clients.elasticsearch._types.query_dsl.GeoDistanceQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch.core.*;
@@ -12,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * es 搜索
@@ -23,7 +22,114 @@ import java.util.Map;
 @Slf4j
 public class App102Test {
     /**
-     * 查询所有文档
+     * 按照地理点搜索&排序
+     *
+     * @throws IOException
+     */
+    @Test
+    public void test8() throws IOException {
+        ElasticsearchClient esClient = ElasticsearchUtil.createClient();
+        //
+        Query query = Query.of(builder -> builder
+                .geoDistance(
+                        GeoDistanceQuery.of(b1 -> b1
+                                .field("location")
+                                .location(
+                                        GeoLocation.of(
+                                                b2 -> b2.latlon(
+                                                        LatLonGeoLocation.of(
+                                                                b3 -> b3.lat(39.915143).lon(116.4039)
+                                                        )
+                                                )
+                                        )
+                                )
+                                .distance("5km")
+                        )
+                )
+        );
+        GeoDistanceSort geoDistanceSort = GeoDistanceSort.of(builder -> builder
+                .field("location")
+                .location(
+                        GeoLocation.of(
+                                b2 -> b2.latlon(
+                                        LatLonGeoLocation.of(
+                                                b3 -> b3.lat(39.915143).lon(116.4039)
+                                        )
+                                )
+                        )
+                )
+                .order(SortOrder.Asc)
+                .unit(DistanceUnit.Kilometers)
+                .distanceType(GeoDistanceType.Plane)
+        );
+        SortOptions sortOptions = SortOptions.of(builder -> builder
+                .geoDistance(geoDistanceSort)
+        );
+        SearchRequest searchRequest = SearchRequest.of(builder -> builder
+                .index("hotel")
+                .query(query)
+                .sort(sortOptions)
+        );
+/*        {
+            "query": {
+            "geo_distance": {
+                "location": {
+                    "lat": 39.915143,
+                            "lon": 116.4039
+                },
+                "distance": "5km"
+            }
+        },
+            "sort": [
+            {
+                "_geo_distance": {
+                "location": [
+                {
+                    "lat": 39.915143,
+                        "lon": 116.4039
+                }
+				],
+                "distance_type": "plane",
+                        "order": "asc",
+                        "unit": "km"
+            }
+            }
+	]
+        }*/
+        SearchResponse<Hotel> searchResponse = esClient.search(searchRequest, Hotel.class);
+        log.info(searchResponse.toString());
+    }
+
+    /**
+     * 布尔查询
+     *
+     * @throws IOException
+     */
+    @Test
+    public void test7() throws IOException {
+        ElasticsearchClient esClient = ElasticsearchUtil.createClient();
+        //
+        Query queryCity = Query.of(builder -> builder
+                .term(b -> b.field("city").value("北京"))
+        );
+        Query queryFull = Query.of(builder -> builder
+                .term(b -> b.field("full_room").value(false))
+        );
+        // 复杂查询可以多组合几层布尔查询即可。
+        Query query = Query.of(builder -> builder
+//                .bool(b -> b.must(Arrays.asList(queryCity, queryFull)))
+                        .bool(b -> b.filter(Arrays.asList(queryCity, queryFull)))
+        );
+        SearchRequest searchRequest = SearchRequest.of(builder -> builder
+                .index("hotel")
+                .query(query)
+        );
+        SearchResponse<Hotel> searchResponse = esClient.search(searchRequest, Hotel.class);
+        log.info(searchResponse.toString());
+    }
+
+    /**
+     * 查询所有文档&排序
      *
      * @throws IOException
      */
@@ -34,9 +140,17 @@ public class App102Test {
         Query query = Query.of(builder -> builder
                 .matchAll(b -> b.boost(9.0F))
         );
+        SortOptions sortOptions = SortOptions.of(
+                builder -> builder
+                        .field(b -> b
+                                .field("price")
+                                .order(SortOrder.Desc)
+                        )
+        );
         SearchRequest searchRequest = SearchRequest.of(builder -> builder
                 .index("hotel")
                 .query(query)
+                .sort(sortOptions)
         );
         SearchResponse<Hotel> searchResponse = esClient.search(searchRequest, Hotel.class);
         log.info(searchResponse.toString());
