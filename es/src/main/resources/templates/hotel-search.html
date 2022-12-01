@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+ 
+        #containet {
+            display: inline-block;
+            border: 1px solid #ed0181;
+            padding: 19px;
+            margin: auto;
+        }
+ 
+        #pageMain li {
+            list-style: none;
+            line-height: 22px;
+        }
+ 
+        #pageBox {
+            padding: 10px 0 0 0;
+        }
+ 
+        #pageBox span {
+            display: inline-block;
+            width: 60px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            color: #fff;
+            background: #08a586;
+ 
+        }
+ 
+        #pageNav {
+            display: inline-block;
+        }
+ 
+        #pageNav a {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            color: #3a87ad;
+            text-decoration: none;
+        }
+ 
+        #pageNav a.active, #pageNav a:hover {
+            background: #3a87ad;
+            color: #EFEFEF;
+        }
+ 
+        #prev:hover {
+            cursor: pointer;
+        }
+ 
+        #next:hover {
+            cursor: pointer;
+        }
+    </style>
+<script src="https://libs.baidu.com/jquery/1.8.3/jquery.min.js"></script>
+<script>
+var pageSize=5;
+jQuery.myPlugin = {//为全局函数创建另一个命名空间；
+	//填充table
+	functionPage:function(totalCount,currentPageNo){
+					var totalPage=totalCount%pageSize==0?totalCount/pageSize:totalCount/pageSize+1;
+					var pageList = '';
+					/*生成页码*/
+					for (var i = 1; i <=totalPage; i++) {
+						if(i==currentPageNo){
+							pageList += '<a class="active"  href="javascript:;">' + (i ) + '</a>';
+						}else{
+							pageList += '<a href="javascript:;">' + (i ) + '</a>';
+						}
+					}
+					$("#pageNav").html(pageList);
+					$("#pageNav").find("a").each(function(){
+						$(this).click(function () {
+							$("#pageNav").find("a").removeClass('active');
+							$(this).addClass('active');
+							var iNum = $(this).index()+1;
+							$.myPlugin.functionRadioChecked(iNum);
+						});
+					})
+	}
+   ,functionFillTable:function (hotelList) {
+		for(i=0;i<hotelList.length;i++){
+			var hotel=hotelList[i];
+			var address=hotel['address'];
+			var businessDistrict=hotel['businessDistrict'];
+			var distance=hotel['distance'];
+			var favourablePercent=hotel['favourablePercent'];
+			var impression=hotel['impression'];
+			var pic=hotel['pic'];
+			var price=hotel['price'];
+			var title=hotel['title'];
+			var star=hotel['star'];
+					
+			var tdPic="<img src=\"pic/"+pic+"\"  width=\"100\" height=\"100\" style=\"float:left\" />";
+			var tdTitle="<font color=\"#0000FF\">"+title+"</font>|";
+			var tdDistance="距您<font color=\"#FF0000\">"+distance+"</font> 公里|";
+			var tdPrice="价格：<font color=\"#FF0000\">"+price+"</font>元|";
+			var tdFavourablePercent="好评率：<font color=\"#FF0000\">"+favourablePercent+"%</font>|";
+			var tdImpression="<font color=\"#0000FF\">网友印象："+impression+"</font>|";
+			var tdBusinessDistrict="<br/>"+businessDistrict+"&nbsp;&nbsp;|";
+			var tdAddress=address;
+			var tdStar="|<font color=\"#0000FF\">"+star+"</font>";
+			var tdContent=tdPic+tdTitle+tdDistance+tdPrice+tdFavourablePercent+tdImpression+tdBusinessDistrict+tdAddress+tdStar;
+			$('table tbody').before("<tr><td colspan='2'>"+tdContent+"</td></tr>");
+		}
+   },functionRadioChecked:function (pageNo) {
+	   
+	   var distanceRadioVal=$("input[name='distance']:checked").val();
+	   //console.log("distanceRadioVal="+distanceRadioVal);
+	   var priceRadioVal=$("input[name='price']:checked").val();
+	   //console.log("priceRadioVal="+priceRadioVal);
+	   var starRadioVal=$("input[name='star']:checked").val();
+	   //console.log("starRadioVal="+starRadioVal);
+	   
+	   var sortRadioVal=$("input[name='sort']:checked").val();
+	   //console.log("sortRadioVal="+sortRadioVal);
+	   $("#hotelTableDiv").html('<table border="1" id=""><tbody></tbody></table>');
+		var keyword=$('#mytext').val();
+		var city=$('#citySelect').val()[0];
+		var latLon=$('#latLon').val();
+		var splitLatLon=latLon.split(",");
+		var lat=splitLatLon[0];
+		var lon=splitLatLon[1];
+		var jsObj={
+					"requestId":"20210603233111", "keyword":keyword,"city":city,"lat":lat,"lon":lon,"pageSize":pageSize,
+					"hotelFilter":{},"hotelSort":{}
+		};
+		if(pageNo==0){
+			pageNo=1;
+		}
+		jsObj["pageNo"]=pageNo;
+		if("all"!=distanceRadioVal){
+			jsObj["hotelFilter"]["distance"]=distanceRadioVal;
+		}
+		if("all"!=priceRadioVal){
+			var lowHighPrice=priceRadioVal.split('|');
+			var lowPrice=lowHighPrice[0];
+			var highPrice=lowHighPrice[1];
+			jsObj["hotelFilter"]["lowPrice"]=lowPrice;
+			jsObj["hotelFilter"]["highPrice"]=highPrice;
+		}
+		if("all"!=starRadioVal){
+			jsObj["hotelFilter"]["star"]=starRadioVal;
+		}
+			
+		if("all"!=sortRadioVal){
+			var sortFieldType=sortRadioVal.split('|');
+			var sortField=sortFieldType[0];
+			var sortType=sortFieldType[1];
+			jsObj["hotelSort"]["sortField"]=sortField;
+			jsObj["hotelSort"]["sortType"]=sortType;
+		}
+		console.log(jsObj);
+		var requestData=JSON.stringify(jsObj);
+			
+	   $.ajax({
+				 type: "POST",
+				 url: "http://localhost:8080/start-search",//搜索建议接口地址
+				 data: requestData,
+				 dataType: "json",
+				 contentType: "application/json",//指定head信息
+				 success: function(data){
+					var searchResult=data['searchResult'];
+					
+					var hotelList=searchResult['hotelList'];
+					console.log(hotelList);
+					$.myPlugin.functionFillTable(hotelList);
+					var totalCount=searchResult['totalCount'];
+					var currentPageNo=searchResult['pageNo'];
+					$.myPlugin.functionPage(totalCount,currentPageNo);
+					
+				  },
+				error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+				}
+		});
+   
+   },//点击搜索按钮进行搜索
+   functionSubmit:function (param) {
+		var keyword=$('#mytext').val();
+		var city=$('#citySelect').val()[0];
+		var latLon=$('#latLon').val();
+		var splitLatLon=latLon.split(",");
+		var lat=splitLatLon[0];
+		var lon=splitLatLon[1];
+		var requestData=JSON.stringify({"requestId":"20210603233111", "keyword":keyword,"city":city,"lat":lat,"lon":lon,"pageNo":1,"pageSize":pageSize});
+		
+		$("#filterCondition").html('筛选条件：');
+		$("#distanceDiv").html('距离：<input name="distance" type="radio" checked  id="distance0" value="all" />不限');
+		//$("#distance0").bind('click', function() {$.myPlugin.functionOne();});
+		$("#starDiv").html('星级：<input name="star" type="radio" checked  id="star0" value="all" />不限');
+		$("#priceDiv").html('价格：<input name="price" type="radio" checked  id="price0" value="all" />不限');
+		$("#hotelTableDiv").html('<table border="1" id=""><tbody></tbody></table>');
+		$("#sortZone").html('<ul >	<li method="sort" data-mth="5" data-dirc="0" title="综合排序"><input name="sort" type="radio" checked  id="sort0" value="all" />综合排序</li>	<li method="sort" data-mth="2" data-dirc="2" title="好评率由高到低"><input name="sort" id="sort1" type="radio" value="favourable_percent|desc" />好评率 高 → 低</li>	<li method="sort" data-mth="5" data-dirc="0" title="价格 低 → 高"><input name="sort" id="sort2" type="radio" value="price|asc" />价格 低 → 高</li>	<li method="sort" data-mth="2" data-dirc="2" title="价格 高 → 低"><input name="sort" id="sort3" type="radio" value="price|desc" />价格 高 → 低</li>	<li method="sort" data-mth="2" data-dirc="2" title="距离 近 → 远"><input name="sort"  id="sort4" type="radio" value="distance|asc" />距离 近 → 远</li>	</ul>');
+	
+		//获取经纬度
+		$.ajax({
+             type: "POST",
+             url: "http://localhost:8080/start-search",//搜索建议接口地址
+             data: requestData,
+             dataType: "json",
+             contentType: "application/json",//指定head信息
+             success: function(data){
+                 //获取搜索返回的数据
+				var searchResult=data['searchResult'];
+                 //获取结果总数
+				var totalCount=searchResult['totalCount'];
+				console.log("totalCount="+totalCount);
+				var hotelList=searchResult['hotelList'];
+                 //根据搜索结果填充搜索列表
+				$.myPlugin.functionFillTable(hotelList);
+				var aggMap=searchResult['aggMap'];
+				var priceAgg=aggMap['price'];
+				//console.log(priceAgg);
+				var maxPrice=priceAgg['max'];
+				var minPrice=priceAgg['min'];
+				var avgPrice=priceAgg['avg'];
+				var radioMinPrice = $('<input>').attr({type: 'radio', name: 'price', value: 0+'|'+minPrice, id: 'price1'});
+				if(maxPrice==minPrice && maxPrice==avgPrice){
+					
+					$(':radio:last-child', '#priceDiv').before(radioMinPrice).before('低于'+minPrice);
+				}else{
+					$(':radio:last-child', '#priceDiv').before(radioMinPrice).before('低于'+minPrice);
+					var radioAvgPrice = $('<input>').attr({type: 'radio', name: 'price', value: minPrice+'|'+avgPrice, id: 'price2'});
+					$(':radio:last-child', '#priceDiv').before(radioAvgPrice).before(minPrice+'-'+avgPrice);
+					var radioMaxPrice = $('<input>').attr({type: 'radio', name: 'price', value: avgPrice+'|'+maxPrice, id: 'price3'});
+					$(':radio:last-child', '#priceDiv').before(radioMaxPrice).before(avgPrice+'-'+maxPrice);
+				}
+				
+				var starAgg=aggMap['star'];
+				var docCountMap=starAgg['docCountMap'];
+				var threeStarKey='三星级';
+				if(docCountMap[threeStarKey]!=null){
+					var radioThreeStar= $('<input>').attr({type: 'radio', name: 'star', value: threeStarKey, id: 'star3'});
+					$(':radio:last-child', '#starDiv').before(radioThreeStar).before(threeStarKey);
+				}
+				var fourStarKey='四星级';
+				if(docCountMap[fourStarKey]!=null){
+					var radioFourStar= $('<input>').attr({type: 'radio', name: 'star', value: fourStarKey, id: 'star4'});
+					$(':radio:last-child', '#starDiv').before(radioFourStar).before(fourStarKey);
+				}
+				var fiveStarKey='五星级';
+				if(docCountMap[fiveStarKey]!=null){
+					var radioFiveStar= $('<input>').attr({type: 'radio', name: 'star', value: fiveStarKey, id: 'star5'});
+					$(':radio:last-child', '#starDiv').before(radioFiveStar).before(fiveStarKey);
+				}
+				var distanceAgg=aggMap['distance'];
+				var disDocCountMap=distanceAgg['docCountMap'];
+				
+				var firstDisKey='0-3';
+				var seconDisKey='0-10';
+				var thirdDisKey='0-50';
+				console.log(disDocCountMap);
+				
+				var distance1= $('<input>').attr({type: 'radio', name: 'distance', value: 3, id: 'distance1'});
+				var distance2= $('<input>').attr({type: 'radio', name: 'distance', value: 10, id: 'distance2'});
+				var distance3= $('<input>').attr({type: 'radio', name: 'distance', value: 50, id: 'distance3'});
+				if(disDocCountMap[firstDisKey]>0 && disDocCountMap[firstDisKey]==disDocCountMap[seconDisKey] && disDocCountMap[seconDisKey]==disDocCountMap[thirdDisKey]){
+					
+					$(':radio:last-child', '#distanceDiv').before(distance1).before(firstDisKey+'公里');
+				}else if(disDocCountMap[seconDisKey]>0 && disDocCountMap[seconDisKey]==disDocCountMap[thirdDisKey]){
+						$(':radio:last-child', '#distanceDiv').before(distance2).before(seconDisKey+'公里');
+				}else{
+					if(disDocCountMap[firstDisKey]!=null && disDocCountMap[firstDisKey]>0){
+						$(':radio:last-child', '#distanceDiv').before(distance1).before(firstDisKey+'公里');
+					}
+					
+					if(disDocCountMap[seconDisKey]!=null && disDocCountMap[seconDisKey]>0){
+						$(':radio:last-child', '#distanceDiv').before(distance2).before(seconDisKey+'公里');
+					}
+					
+					if(disDocCountMap[thirdDisKey]!=null && disDocCountMap[thirdDisKey]>0){
+						$(':radio:last-child', '#distanceDiv').before(distance3).before(thirdDisKey+'公里');
+					}
+				}
+				$("input[name='distance']").change(function(){
+					//var radioVal=$("input[name='distance']:checked").val();
+					$.myPlugin.functionRadioChecked(1);
+				
+				});
+				$("input[name='price']").change(function(){
+					$.myPlugin.functionRadioChecked(1);
+				});
+				$("input[name='star']").change(function(){
+					$.myPlugin.functionRadioChecked(1);
+				
+				});
+				$("input[name='sort']").change(function(){
+					$.myPlugin.functionRadioChecked(1);
+				
+				});
+				var totalCount=searchResult['totalCount'];
+				var currentPageNo=searchResult['pageNo'];
+				$.myPlugin.functionPage(totalCount,currentPageNo);
+              },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+            }
+         });
+   }
+}
+$(document).ready(function(){
+	$("#suggestSelect").hide();
+    //监听文本框的输入动作
+    $('#mytext').on('input oninput', function() {
+        //获取文本框的内容
+        var txtChange = $("#mytext").val();
+        if(txtChange==''){
+            $("#suggestSelect").empty();
+            $("#suggestSelect").hide();
+        }
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8085/search-sug",//搜索建议接口地址
+            data: JSON.stringify({"requestId":"20210603233111", "prefixWord":txtChange}),
+            dataType: "json",
+            contentType: "application/json",//指定head信息
+            success: function(data){
+                //如果没有返回数据，则清空原有数据
+                if(data["sugList"].length==0){
+                    $("#suggestSelect").empty();
+                    $("#suggestSelect").hide();
+                }else{
+                    //开始重绘suggest的内容
+                    $("#suggestSelect").empty();
+                    $("#suggestSelect").prop("size",data["sugList"].length)
+                    for(var i=0;i<data["sugList"].length;i++){
+                        $("#suggestSelect").append("<option>"+data["sugList"][i]+"</option>");
+                    }
+                    $("#suggestSelect").show();
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                $("#suggestSelect").empty();
+                $("#suggestSelect").hide();
+            }
+        });
+    });
+	
+	$('#suggestSelect').on('change', function() {
+		var sugText=$('#suggestSelect').val();
+		$("#mytext").val(sugText);
+    });
+	$('#searchButton').on('click', function() {
+		$.myPlugin.functionSubmit();
+    });
+})
+
+</script>
+</head>
+<body>
+	<br/>
+	&nbsp;&nbsp;请选择城市<select id="citySelect" multiple="multiple" size="3">
+		<option selected>北京</option>
+		<option>青岛</option>
+		<option>天津</option>
+    </select>&nbsp;
+	&nbsp;&nbsp;经纬度(维度在前，经度在后，逗号分隔):<input type="text" id="latLon" name="test" class="txt" />
+    <br/>&nbsp;&nbsp;关键词&nbsp;<input type="text" id="mytext" name="test" class="txt" />
+	
+	&nbsp;&nbsp;<button type="button" id="searchButton">&nbsp;搜&nbsp;索&nbsp;</button>
+	<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<select id="suggestSelect" multiple="multiple" size="10">
+    </select>
+	<br/>
+	<div id='filterCondition'></div><br/>
+	<div id="distanceDiv"></div>
+	<br/>
+	  <div id="priceDiv"></div>
+	<br/>
+	 <div id="starDiv"></div>
+	<div  id="sortZone" >
+
+	</div>
+<br/><br/>
+
+<div id='hotelTableDiv'>
+<table border="1" id="">
+<tbody></tbody>
+</table>
+</div>
+    <div id="pageBox">
+        <span id="prev">上一页</span>
+        <ul id="pageNav"></ul>
+        <span id="next">下一页</span>
+    </div>
+
+<style type="text/css">
+div   li{
+height:30px;
+list-style-type:none;
+border:1px solid pink;
+text-align:center;
+}
+div ul li{
+width:150px;
+float:left;
+}
+</style>
+
+</body>
+</html>
