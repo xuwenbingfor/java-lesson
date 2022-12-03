@@ -4,7 +4,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.jz.es.model.form.SugReq;
 import com.jz.es.service.SugInitService;
-import com.jz.es.service.SugService;
+import com.jz.es.service.SugSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +19,13 @@ public class HotelSearchSugController {
     @Autowired
     SugInitService pyProcessService;//处理拼音
     @Autowired
-    SugService sugService;//调用搜索建议逻辑
+    SugSearchService sugSearchService;//调用搜索建议逻辑
 
     //处理搜索建议请求
     @PostMapping(value = "/search-sug", produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String getSug(@RequestBody SugReq sugReq) throws Exception {
-        List<String> sugList = sugService.suggestSearch(sugReq.getPrefixWord());//获取搜索建议内容
+        List<String> sugList = sugSearchService.suggestSearch(sugReq.getPrefixWord());//获取搜索建议内容
         JSONObject result = new JSONObject();
         //封装结果
         result.put("requestId", sugReq.getRequestId());

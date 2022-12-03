@@ -22,7 +22,7 @@ import java.util.Map;
  * Created by GaoYinHui on 2021/6/3.
  */
 @Service
-public class SugService {
+public class SugSearchService {
     //定义三种搜索建议的名称
     public static final String chineseSugName = "hotel_chinese_sug";
     public static final String fullPinyinSugName = "hotel_full_pinyin_sug";
